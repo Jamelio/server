@@ -1,0 +1,24 @@
+{
+  "name": "jamelio-peer-server",
+  "version": "1.0.0",
+  "description": "Jamelio video chat peer server",
+  "scripts": {
+    "start": "ts-node ./src/start.ts"
+  },
+  "author": "sergei@basharov.net",
+  "dependencies": {
+    "@types/koa": "^2.13.4",
+    "@types/node": "^17.0.18",
+    "@types/webpack": "^5.28.0",
+    "dotenv": "^16.0.0",
+    "express": "^4.17.2",
+    "html-webpack-plugin": "^5.5.0",
+    "koa": "^2.13.4",
+    "peer": "^0.6.1",
+    "ts-loader": "^9.2.6",
+    "ts-node": "^10.5.0",
+    "typescript": "^4.5.5",
+    "webpack": "^5.68.0",
+    "webpack-cli": "^4.9.2"
+  }
+}
