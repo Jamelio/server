@@ -1,14 +1,13 @@
 import { readFileSync } from 'fs';
-
-const { ExpressPeerServer } = require('peer');
+import { ExpressPeerServer } from 'peer';
 
 const express = require('express');
 const https = require('https');
 const app = express();
 
 const httpsServer = https.createServer({
-  key: readFileSync('/Users/sergeibasharov/WebstormProjects/jamelio/peer-server/certs/jamelio.local+2-key.pem'),
-  cert: readFileSync('/Users/sergeibasharov/WebstormProjects/jamelio/peer-server/certs/jamelio.local+2.pem'),
+  key: readFileSync(`${process.cwd()}/certs/jamelio.local+2-key.pem`),
+  cert: readFileSync(`${process.cwd()}/certs/jamelio.local+2.pem`),
 }, app);
 
 
@@ -25,8 +24,21 @@ httpsServer.listen(443, () => {
 });
 
 const peerServer = ExpressPeerServer(httpsServer, {
-  path: '/',
+  path: '',
 });
 
+app.use('/peer', peerServer);
 
-app.use('/jamelio', peerServer);
+peerServer.on('connection', (client: any) => {
+  console.log(`Connected: ${client.id}`)
+  if (client.id === 'john') {
+    console.log('john is not allowed, will disconnect in 3 seconds...')
+    setTimeout(() => {
+      client.getSocket().close()
+    }, 3000)
+  }
+});
+
+peerServer.on('disconnect', (client: any) => {
+  console.log(`Disconnected: ${client.id}`)
+});
