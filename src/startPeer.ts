@@ -2,6 +2,8 @@ import { RedisClientType } from 'redis';
 import { readFileSync } from 'fs';
 import { ExpressPeerServer } from 'peer';
 
+const { rando } = require('@nastyox/rando.js');
+
 const express = require('express');
 const https = require('https');
 const app = express();
@@ -36,9 +38,19 @@ export const startPeer = async (redis: RedisClientType<any, any>) => {
     res.send(`Members online: ${membersOnlineCount}`)
   })
 
-  peerServer.on('connection', (client: any) => {
+  app.get('/api/memberId', async (req: any, res: any) => {
+    const { p: peerId } = req.query;
+    const members = await redis.lRange('members', 0, -1);
+    res.send({ id: rando(members.filter(member => member !== peerId)).value })
+  })
+
+  peerServer.on('connection', async (client: any) => {
     console.log(`Connected: ${client.id}`)
     redis.incr('membersOnlineCount')
+    const result = await redis.rPush('members', client.id);
+    console.log(result)
+
+
     /*
         if (client.id === 'john') {
           console.log('john is not allowed, will disconnect in 3 seconds...')
@@ -49,9 +61,12 @@ export const startPeer = async (redis: RedisClientType<any, any>) => {
     */
   });
 
-  peerServer.on('disconnect', (client: any) => {
+  peerServer.on('disconnect', async (client: any) => {
     console.log(`Disconnected: ${client.id}`)
     redis.decr('membersOnlineCount')
+    const result = await redis.lRem('members', 0, client.id);
+    console.log(result)
+
   });
 
   return { peerServer };
