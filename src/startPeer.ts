@@ -1,6 +1,7 @@
 import { RedisClientType } from 'redis';
 import { readFileSync } from 'fs';
 import { ExpressPeerServer } from 'peer';
+import { randomBytes } from 'crypto';
 
 const { rando } = require('@nastyox/rando.js');
 
@@ -42,6 +43,11 @@ export const startPeer = async (redis: RedisClientType<any, any>) => {
     const { p: peerId } = req.query;
     const members = await redis.lRange('members', 0, -1);
     res.send({ id: rando(members.filter(member => member !== peerId)).value })
+  })
+
+  app.get('/api/token', async (req: any, res: any) => {
+    const token = randomBytes(256).toString('base64url');
+    res.send({ token })
   })
 
   peerServer.on('connection', async (client: any) => {
